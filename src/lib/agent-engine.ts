@@ -150,6 +150,7 @@ export async function runTurn(input: {
       if (!stillOpen) {
         return { say: `I'm sorry — ${move.time} just went. Can I offer another time?` }
       }
+      const startsAt = new Date(`${move.date}T${move.time}:00Z`)
       await db.insert(appointments).values({
         userId: input.userId,
         agentId: input.agent.id,
@@ -157,8 +158,20 @@ export async function runTurn(input: {
         contactName: move.callerName,
         contactPhone: move.callerPhone || null,
         service: service.name,
-        startsAt: new Date(`${move.date}T${move.time}:00Z`),
+        startsAt,
         minutes: service.minutes,
+      })
+      // No-show prevention: every booking gets a reminder follow-up a day
+      // ahead (or halfway there for near-term bookings).
+      const reminderAt = new Date(Math.max(Date.now() + 60_000, Math.min(startsAt.getTime() - 86_400_000, startsAt.getTime() - (startsAt.getTime() - Date.now()) / 2)))
+      await db.insert(followups).values({
+        userId: input.userId,
+        agentId: input.agent.id,
+        contactId: input.contactId ?? null,
+        callId: input.callId,
+        channel: 'sms',
+        reason: `Appointment reminder: ${move.callerName} — ${service.name} on ${move.date} at ${move.time}. Confirm or offer to rebook.`,
+        dueAt: reminderAt,
       })
       return { say: move.say }
     }

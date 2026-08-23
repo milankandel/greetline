@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { agents, campaignCalls, campaigns, contacts, destinations, followups, type Service } from '@/db/schema'
 import { newSecret } from '@/lib/crypto'
+import { randomBytes } from 'node:crypto'
 import { requireUser } from '@/lib/session'
 import { assertPublicUrl } from '@/lib/webhook'
 import { draftAgent, type DraftedAgent } from '@/lib/agent-author'
@@ -51,7 +52,7 @@ export async function saveAgent(_prev: ActionState, formData: FormData): Promise
     if (id) {
       await db.update(agents).set(values).where(and(eq(agents.id, String(id)), eq(agents.userId, user.id)))
     } else {
-      await db.insert(agents).values({ userId: user.id, ...values })
+      await db.insert(agents).values({ userId: user.id, publicId: randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, 'x'), ...values })
     }
     revalidatePath('/dashboard/agents')
     return { ok: id ? 'Agent updated' : 'Agent created' }

@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { db } from '@/db'
 import { agents, campaignCalls, campaigns, contacts, users } from '@/db/schema'
 import { endSession, startSession } from '@/lib/session'
+import { randomBytes } from 'node:crypto'
 
 export type FormState = { error?: string }
 
@@ -25,6 +26,7 @@ async function seedWorkspace(userId: string) {
     .insert(agents)
     .values({
       userId,
+      publicId: randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, 'x'),
       name: 'Maya',
       businessName: 'Harbor Dental Studio',
       persona:

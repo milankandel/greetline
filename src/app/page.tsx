@@ -98,8 +98,8 @@ export default async function Home() {
               real calendar, calls your list toward goals you set — and refuses to pester anyone. Every outcome lands in your CRM, signed.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <Link href="/signup" className="btn btn-primary px-5 py-2.5">
-                Talk to the demo agent <ArrowRight className="size-4" />
+              <Link href={process.env.NEXT_PUBLIC_DEMO_AGENT ? `/try/${process.env.NEXT_PUBLIC_DEMO_AGENT}` : '/signup'} className="btn btn-primary px-5 py-2.5">
+                Talk to the demo agent — no signup <ArrowRight className="size-4" />
               </Link>
               <Waveform />
             </div>

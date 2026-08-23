@@ -26,9 +26,13 @@ export const agents = pgTable('agents', {
   greeting: text('greeting').notNull(),
   /** The prompt the operator typed; kept so the agent can be re-authored. */
   authoredFrom: text('authored_from'),
+  /** Public handle for the no-signup demo page and the embeddable widget. */
+  publicId: text('public_id'),
+  /** Whether the public page and widget are enabled for this agent. */
+  publicEnabled: boolean('public_enabled').default(true).notNull(),
   active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (t) => [uniqueIndex('agents_public_id_key').on(t.publicId)])
 
 export type Service = { name: string; minutes: number; priceUsd: number | null }
 
@@ -80,7 +84,9 @@ export const calls = pgTable('calls', {
   contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
   campaignId: uuid('campaign_id').references(() => campaigns.id, { onDelete: 'set null' }),
   direction: text('direction').$type<'inbound' | 'outbound'>().notNull(),
-  transport: text('transport').$type<'browser' | 'simulated'>().notNull(),
+  transport: text('transport').$type<'browser' | 'simulated' | 'widget'>().notNull(),
+  /** True when started from the public demo page or widget — rate-limited. */
+  viaPublic: boolean('via_public').default(false).notNull(),
   transcript: jsonb('transcript').$type<Turn[]>().default([]).notNull(),
   /** What the call achieved, set by the agent's end_call tool. */
   outcome: text('outcome').$type<'booked' | 'message_taken' | 'follow_up_set' | 'declined' | 'no_outcome'>(),
