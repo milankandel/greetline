@@ -62,6 +62,9 @@ function systemPrompt(agent: AgentRow, direction: 'inbound' | 'outbound', goal?:
     'If the caller asks to never be contacted again, apologise once, end the call with outcome declined, and say nothing more.',
     'Keep every reply to one or two short spoken sentences.',
     'When the caller signals they are finished — a goodbye, a thanks-that-is-all — say a brief closing line and use the end_call action with the correct outcome. Never leave a finished call hanging.',
+    'Never state whether a time is or is not available unless a check_availability result from THIS call says so.',
+    'Any promise to contact the caller later MUST be made through the schedule_followup action at the moment you make it — a spoken promise with no action is a broken promise.',
+    'When ending the call, always fill callerName and callerPhone if the caller mentioned them at any point.',
   ].filter(Boolean).join('\n')
 }
 
@@ -190,18 +193,43 @@ export async function runTurn(input: {
       return { say: move.say }
     }
 
-    case 'end_call':
+    case 'end_call': {
+      const outcome = (move.outcome as 'booked' | 'message_taken' | 'follow_up_set' | 'declined' | 'no_outcome') || 'no_outcome'
+
+      // Safety net: a follow_up_set outcome must leave a follow-up row even
+      // when the model skipped the schedule_followup action mid-call.
+      if (outcome === 'follow_up_set') {
+        const existing = await db.select({ id: followups.id }).from(followups).where(eq(followups.callId, input.callId)).limit(1)
+        if (!existing.length) {
+          await db.insert(followups).values({
+            userId: input.userId,
+            agentId: input.agent.id,
+            contactId: input.contactId ?? null,
+            callId: input.callId,
+            channel: 'call',
+            reason: move.summary || 'Promised on call',
+            dueAt: new Date(Date.now() + 18 * 3_600_000),
+          })
+        }
+      }
+
+      // Salvage contact details from the transcript when the model left the
+      // captured fields empty — a phone number said aloud must not be lost.
+      const spoken = input.turns.filter((t) => t.role === 'caller').map((t) => t.text).join(' ')
+      const phoneMatch = move.callerPhone || spoken.match(/(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}/)?.[0] || null
+
       return {
         say: move.say,
         ended: {
-          outcome: (move.outcome as 'booked' | 'message_taken' | 'follow_up_set' | 'declined' | 'no_outcome') || 'no_outcome',
+          outcome,
           summary: move.summary || '',
           captured: {
             callerName: move.callerName || null,
-            callerPhone: move.callerPhone || null,
+            callerPhone: phoneMatch,
           },
         },
       }
+    }
 
     default:
       return { say: move.say }
