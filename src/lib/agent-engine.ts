@@ -246,6 +246,7 @@ export async function runTurn(input: {
             move.date && move.time && move.callerName &&
             (await openSlots(input.userId, input.agent, move.date, service.minutes)).includes(move.time)
           if (canBook) {
+            const startsAt = new Date(`${move.date}T${move.time}:00Z`)
             await db.insert(appointments).values({
               userId: input.userId,
               agentId: input.agent.id,
@@ -253,8 +254,18 @@ export async function runTurn(input: {
               contactName: move.callerName,
               contactPhone: move.callerPhone || null,
               service: service.name,
-              startsAt: new Date(`${move.date}T${move.time}:00Z`),
+              startsAt,
               minutes: service.minutes,
+            })
+            // Same no-show reminder the action path creates.
+            await db.insert(followups).values({
+              userId: input.userId,
+              agentId: input.agent.id,
+              contactId: input.contactId ?? null,
+              callId: input.callId,
+              channel: 'sms',
+              reason: `Appointment reminder: ${move.callerName} — ${service.name} on ${move.date} at ${move.time}. Confirm or offer to rebook.`,
+              dueAt: new Date(Math.max(Date.now() + 60_000, startsAt.getTime() - 86_400_000)),
             })
           } else {
             outcome = 'follow_up_set'
