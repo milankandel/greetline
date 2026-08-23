@@ -65,6 +65,7 @@ function systemPrompt(agent: AgentRow, direction: 'inbound' | 'outbound', goal?:
     'Never state whether a time is or is not available unless a check_availability result from THIS call says so.',
     'Any promise to contact the caller later MUST be made through the schedule_followup action at the moment you make it — a spoken promise with no action is a broken promise. Use it at most once per call.',
     'On the turn where the caller says goodbye, the action is ALWAYS end_call — never anything else.',
+    'You may only say an appointment is booked on the same turn you use the book_appointment action. Words do not book anything; the action does.',
     'When ending the call, always fill callerName and callerPhone if the caller mentioned them at any point.',
   ].filter(Boolean).join('\n')
 }
@@ -199,11 +200,52 @@ export async function runTurn(input: {
     }
 
     case 'end_call': {
-      const outcome = (move.outcome as 'booked' | 'message_taken' | 'follow_up_set' | 'declined' | 'no_outcome') || 'no_outcome'
+      let outcome = (move.outcome as 'booked' | 'message_taken' | 'follow_up_set' | 'declined' | 'no_outcome') || 'no_outcome'
+      let endSummary = move.summary || ''
+
+      // Reconciliation: a 'booked' ending must correspond to a real
+      // appointment row from this call. When the model narrated a booking it
+      // never performed, book it now if the details are present and the slot
+      // is genuinely open — otherwise downgrade honestly and leave a
+      // follow-up so a human repairs the promise.
+      if (outcome === 'booked') {
+        const rows = await db.select({ id: appointments.id }).from(appointments).where(eq(appointments.callId, input.callId)).limit(1)
+        if (!rows.length) {
+          const service =
+            input.agent.services.find((sv) => sv.name.toLowerCase() === (move.service ?? '').toLowerCase()) ?? input.agent.services[0]
+          const canBook =
+            move.date && move.time && move.callerName &&
+            (await openSlots(input.userId, input.agent, move.date, service.minutes)).includes(move.time)
+          if (canBook) {
+            await db.insert(appointments).values({
+              userId: input.userId,
+              agentId: input.agent.id,
+              callId: input.callId,
+              contactName: move.callerName,
+              contactPhone: move.callerPhone || null,
+              service: service.name,
+              startsAt: new Date(`${move.date}T${move.time}:00Z`),
+              minutes: service.minutes,
+            })
+          } else {
+            outcome = 'follow_up_set'
+            endSummary = `NEEDS ATTENTION — caller was told a booking exists but none was made. ${endSummary}`
+            await db.insert(followups).values({
+              userId: input.userId,
+              agentId: input.agent.id,
+              contactId: input.contactId ?? null,
+              callId: input.callId,
+              channel: 'call',
+              reason: endSummary,
+              dueAt: new Date(Date.now() + 60 * 60_000),
+            })
+          }
+        }
+      }
 
       // Safety net: a follow_up_set outcome must leave a follow-up row even
       // when the model skipped the schedule_followup action mid-call.
-      if (outcome === 'follow_up_set') {
+      if (outcome === 'follow_up_set' && !endSummary.startsWith('NEEDS ATTENTION')) {
         const existing = await db.select({ id: followups.id }).from(followups).where(eq(followups.callId, input.callId)).limit(1)
         if (!existing.length) {
           await db.insert(followups).values({
@@ -227,7 +269,7 @@ export async function runTurn(input: {
         say: move.say,
         ended: {
           outcome,
-          summary: move.summary || '',
+          summary: endSummary,
           captured: {
             callerName: move.callerName || null,
             callerPhone: phoneMatch,
