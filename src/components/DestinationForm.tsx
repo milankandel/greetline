@@ -8,7 +8,7 @@ export function DestinationForm() {
   return (
     <form action={submit} className="card grid gap-2 p-4 sm:grid-cols-[1fr_2fr_auto]">
       <input name="name" required className="input-base" placeholder="HubSpot inbound" />
-      <input name="url" required type="url" className="input-base" placeholder="https://api.yourcrm.com/hooks/voxdesk" />
+      <input name="url" required type="url" className="input-base" placeholder="https://api.yourcrm.com/hooks/greetline" />
       <button type="submit" disabled={pending} className="btn btn-primary">
         {pending ? '…' : 'Add destination'}
       </button>

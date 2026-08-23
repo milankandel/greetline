@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 
-const COOKIE = 'vd_session'
+const COOKIE = 'gl_session'
 const MAX_AGE = 60 * 60 * 24 * 30
 
 function secret(): Uint8Array {

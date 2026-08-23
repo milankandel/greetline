@@ -18,7 +18,7 @@ export function AuthForm({ mode, action }: Props) {
       <div>
         <h1 className="text-lg font-semibold text-white">{isSignup ? 'Create your workspace' : 'Welcome back'}</h1>
         <p className="mt-1 text-sm text-gray-400">
-          {isSignup ? 'A working receptionist, sample contacts, and a ready campaign are set up for you.' : 'Sign in to your VoxDesk workspace.'}
+          {isSignup ? 'A working receptionist, sample contacts, and a ready campaign are set up for you.' : 'Sign in to your Greetline workspace.'}
         </p>
       </div>
 

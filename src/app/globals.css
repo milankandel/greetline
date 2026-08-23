@@ -57,21 +57,21 @@ body {
 .btn-ghost { border: 1px solid var(--color-edge); color: #cbd5e1; }
 .btn-ghost:hover { border-color: #374151; background: #131a24; }
 
-@keyframes vd-wave {
+@keyframes gl-wave {
   0%, 100% { transform: scaleY(0.35); }
   50% { transform: scaleY(1); }
 }
-.vd-bar { animation: vd-wave 1.2s ease-in-out infinite; transform-origin: center; }
+.gl-bar { animation: gl-wave 1.2s ease-in-out infinite; transform-origin: center; }
 
-@keyframes vd-rise {
+@keyframes gl-rise {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
 }
-.vd-rise { animation: vd-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.vd-rise-2 { animation-delay: 0.12s; }
-.vd-rise-3 { animation-delay: 0.24s; }
+.gl-rise { animation: gl-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.gl-rise-2 { animation-delay: 0.12s; }
+.gl-rise-3 { animation-delay: 0.24s; }
 
-.vd-glow {
+.gl-glow {
   background:
     radial-gradient(600px 300px at 20% 0%, rgb(139 92 246 / 0.14), transparent 60%),
     radial-gradient(500px 260px at 85% 10%, rgb(56 189 248 / 0.08), transparent 60%);

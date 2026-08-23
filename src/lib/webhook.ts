@@ -91,9 +91,9 @@ export async function deliver(input: {
       headers: {
         ...input.headers,
         'content-type': 'application/json',
-        'user-agent': 'VoxDesk/1.0',
-        'x-voxdesk-signature': `t=${timestamp},v1=${sign(input.secret, timestamp, body)}`,
-        'x-voxdesk-idempotency-key': input.idempotencyKey,
+        'user-agent': 'Greetline/1.0',
+        'x-greetline-signature': `t=${timestamp},v1=${sign(input.secret, timestamp, body)}`,
+        'x-greetline-idempotency-key': input.idempotencyKey,
       },
       body,
     })

@@ -14,7 +14,7 @@ const PILLARS = [
   {
     icon: PhoneIncoming,
     title: 'Answers like your best hire',
-    body: 'Describe your business in one sentence. VoxDesk drafts the persona, greeting, and a step-by-step SOP — booking rules, what never to promise, when to hand off to a human. You edit; it obeys.',
+    body: 'Describe your business in one sentence. Greetline drafts the persona, greeting, and a step-by-step SOP — booking rules, what never to promise, when to hand off to a human. You edit; it obeys.',
   },
   {
     icon: PhoneOutgoing,
@@ -48,7 +48,7 @@ function Waveform() {
   return (
     <div className="flex h-12 items-center gap-1" aria-hidden>
       {heights.map((h, i) => (
-        <span key={i} className="vd-bar w-1 rounded-full bg-brand/70" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
+        <span key={i} className="gl-bar w-1 rounded-full bg-brand/70" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
       ))}
     </div>
   )
@@ -58,11 +58,11 @@ export default async function Home() {
   const user = await currentUser()
 
   return (
-    <main className="vd-glow">
+    <main className="gl-glow">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <span className="flex items-center gap-2 font-semibold text-white">
           <AudioLines className="size-5 text-brand" />
-          VoxDesk
+          Greetline
         </span>
         <nav className="flex items-center gap-3 text-sm">
           {user ? (
@@ -84,7 +84,7 @@ export default async function Home() {
 
       <section className="mx-auto max-w-6xl px-6 pt-16 pb-24">
         <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
-          <div className="vd-rise">
+          <div className="gl-rise">
             <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-raised/80 px-3 py-1 text-xs text-gray-400">
               <span className="size-1.5 rounded-full bg-brand" />
               Inbound · Outbound · Follow-ups — one agent
@@ -94,7 +94,7 @@ export default async function Home() {
               <span className="block bg-gradient-to-r from-violet-300 via-brand to-sky-300 bg-clip-text text-transparent">answered forever.</span>
             </h1>
             <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-gray-400">
-              VoxDesk is an AI receptionist you author in one sentence. It answers every call by your SOP, books real appointments against a
+              Greetline is an AI receptionist you author in one sentence. It answers every call by your SOP, books real appointments against a
               real calendar, calls your list toward goals you set — and refuses to pester anyone. Every outcome lands in your CRM, signed.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -106,7 +106,7 @@ export default async function Home() {
             <p className="mt-3 text-xs text-gray-600">Free workspace, preloaded with a receptionist, contacts, and a running campaign.</p>
           </div>
 
-          <div className="card vd-rise vd-rise-2 overflow-hidden shadow-[0_0_80px_-20px_rgb(139_92_246/0.25)]">
+          <div className="card gl-rise gl-rise-2 overflow-hidden shadow-[0_0_80px_-20px_rgb(139_92_246/0.25)]">
             <div className="flex items-center gap-2 border-b border-edge px-4 py-2.5">
               <span className="size-2 rounded-full bg-emerald-400" />
               <span className="text-xs text-gray-400">Live call — Maya · Harbor Dental Studio</span>
@@ -125,7 +125,7 @@ export default async function Home() {
                 </div>
               ))}
               <div className="rounded-lg border border-edge bg-ink p-3 font-mono text-[11px] leading-relaxed text-gray-500">
-                POST /crm/hooks · x-voxdesk-signature: t=1787…,v1=9c41…{'\n'}
+                POST /crm/hooks · x-greetline-signature: t=1787…,v1=9c41…{'\n'}
                 {'{'} &quot;type&quot;: &quot;call.completed&quot;, &quot;outcome&quot;: &quot;booked&quot;, &quot;service&quot;: &quot;Emergency assessment&quot;, &quot;startsAt&quot;: &quot;10:30&quot; {'}'}
               </div>
             </div>
@@ -136,7 +136,7 @@ export default async function Home() {
       <section className="border-y border-edge bg-surface/40">
         <div className="mx-auto grid max-w-6xl gap-x-10 gap-y-12 px-6 py-20 sm:grid-cols-2 lg:grid-cols-3">
           {PILLARS.map((p, i) => (
-            <div key={p.title} className={`vd-rise ${i % 3 === 1 ? 'vd-rise-2' : i % 3 === 2 ? 'vd-rise-3' : ''}`}>
+            <div key={p.title} className={`gl-rise ${i % 3 === 1 ? 'gl-rise-2' : i % 3 === 2 ? 'gl-rise-3' : ''}`}>
               <div className="inline-flex rounded-lg border border-edge bg-raised p-2">
                 <p.icon className="size-4 text-brand" />
               </div>
@@ -159,9 +159,9 @@ export default async function Home() {
 
       <footer className="border-t border-edge">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-xs text-gray-600">
-          <span>VoxDesk — built by Milan Kandel</span>
-          <a href="https://github.com/milankandel/voxdesk" className="hover:text-brand" target="_blank" rel="noreferrer">
-            github.com/milankandel/voxdesk
+          <span>Greetline — built by Milan Kandel</span>
+          <a href="https://github.com/milankandel/greetline" className="hover:text-brand" target="_blank" rel="noreferrer">
+            github.com/milankandel/greetline
           </a>
         </div>
       </footer>

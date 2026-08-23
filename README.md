@@ -1,15 +1,15 @@
-# VoxDesk
+# Greetline
 
 An AI receptionist you author in one sentence — it answers calls, books real appointments,
 works outbound campaigns politely, and posts every outcome to your CRM as a signed webhook.
 
-**Live demo:** [voxdesk-nu.vercel.app](https://voxdesk.vercel.app) *(URL confirmed on deploy)* —
+**Live demo:** [greetline-nu.vercel.app](https://greetline.vercel.app) *(URL confirmed on deploy)* —
 sign up, click **Simulate incoming call**, and speak.
 
 ## What it does
 
 - **Author by prompting.** Describe the business ("a barbershop with three chairs, closed Mondays")
-  → VoxDesk drafts the persona, greeting, bookable services, and a step-by-step SOP the agent must
+  → Greetline drafts the persona, greeting, bookable services, and a step-by-step SOP the agent must
   follow — including what it may never promise. Everything lands in an editable form; nothing goes
   live unreviewed.
 - **Inbound calls in the browser.** Speech recognition in, natural TTS out (Gemini TTS with

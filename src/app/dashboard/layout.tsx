@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
           <Link href="/dashboard" className="flex items-center gap-2 text-sm font-semibold text-white">
             <AudioLines className="size-4 text-brand" />
-            VoxDesk
+            Greetline
           </Link>
           <nav className="flex flex-1 flex-wrap gap-1">
             {NAV.map((n) => (
