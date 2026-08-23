@@ -211,6 +211,35 @@ export async function runTurn(input: {
       if (outcome === 'booked') {
         const rows = await db.select({ id: appointments.id }).from(appointments).where(eq(appointments.callId, input.callId)).limit(1)
         if (!rows.length) {
+          // The move rarely carries the details on this failure path; pull
+          // them from what was actually said before giving up.
+          if (!move.date || !move.time || !move.callerName) {
+            const salvage = await completeStructured({
+              system: 'Extract the appointment agreed on this call. Use only facts stated in the transcript. Today is ' + new Date().toISOString().slice(0, 10) + '.',
+              user: transcriptAsText(input.turns),
+              toolName: 'booking',
+              toolDescription: 'The appointment both sides agreed to.',
+              schema: {
+                type: 'object',
+                properties: {
+                  date: { type: 'string', description: 'YYYY-MM-DD' },
+                  time: { type: 'string', description: 'HH:MM 24h' },
+                  service: { type: 'string' },
+                  callerName: { type: 'string' },
+                  callerPhone: { type: 'string' },
+                },
+                required: ['date', 'time', 'callerName'],
+              },
+            }).catch(() => null)
+            if (salvage) {
+              const got = salvage.output as Record<string, string>
+              move.date = move.date || got.date
+              move.time = move.time || got.time
+              move.service = move.service || got.service
+              move.callerName = move.callerName || got.callerName
+              move.callerPhone = move.callerPhone || got.callerPhone
+            }
+          }
           const service =
             input.agent.services.find((sv) => sv.name.toLowerCase() === (move.service ?? '').toLowerCase()) ?? input.agent.services[0]
           const canBook =
