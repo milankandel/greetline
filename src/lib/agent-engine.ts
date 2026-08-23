@@ -63,7 +63,8 @@ function systemPrompt(agent: AgentRow, direction: 'inbound' | 'outbound', goal?:
     'Keep every reply to one or two short spoken sentences.',
     'When the caller signals they are finished — a goodbye, a thanks-that-is-all — say a brief closing line and use the end_call action with the correct outcome. Never leave a finished call hanging.',
     'Never state whether a time is or is not available unless a check_availability result from THIS call says so.',
-    'Any promise to contact the caller later MUST be made through the schedule_followup action at the moment you make it — a spoken promise with no action is a broken promise.',
+    'Any promise to contact the caller later MUST be made through the schedule_followup action at the moment you make it — a spoken promise with no action is a broken promise. Use it at most once per call.',
+    'On the turn where the caller says goodbye, the action is ALWAYS end_call — never anything else.',
     'When ending the call, always fill callerName and callerPhone if the caller mentioned them at any point.',
   ].filter(Boolean).join('\n')
 }
@@ -180,6 +181,10 @@ export async function runTurn(input: {
     }
 
     case 'schedule_followup': {
+      // One promise per call. The model repeating the action on a later turn
+      // must not multiply into repeated contact — that is how you disturb people.
+      const already = await db.select({ id: followups.id }).from(followups).where(eq(followups.callId, input.callId)).limit(1)
+      if (already.length) return { say: move.say }
       const due = move.followupWhen ? new Date(`${move.followupWhen}T14:00:00Z`) : new Date(Date.now() + 2 * 86_400_000)
       await db.insert(followups).values({
         userId: input.userId,
